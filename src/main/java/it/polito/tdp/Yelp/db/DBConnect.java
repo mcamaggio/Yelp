@@ -1,20 +1,40 @@
 package it.polito.tdp.Yelp.db;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
+
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 public class DBConnect {
 
+	private static final String jdbcURL = "jdbc:mysql://localhost/yelp";
+	private static HikariDataSource ds;
+	
 	public static Connection getConnection() {
-		String url = "jdbc:mysql://localhost:3306/yelp?user=root&password=root";
+		
+		if (ds == null) {
+			HikariConfig config = new HikariConfig();
+			config.setJdbcUrl(jdbcURL);
+			config.setUsername("root");
+			config.setPassword("eletrica");
+			
+			// configurazione MySQL
+			config.addDataSourceProperty("cachePrepStmts", "true");
+			config.addDataSourceProperty("prepStmtCacheSize", "250");
+			config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+			
+			ds = new HikariDataSource(config);
+		}
+		
 		try {
-			Connection conn = DriverManager.getConnection(url);
-			return conn ;
+			
+			return ds.getConnection();
+
 		} catch (SQLException e) {
-			System.out.println("ERRORE di connessione al database");
-			e.printStackTrace();
-			return null ;
+			System.err.println("Errore connessione al DB");
+			throw new RuntimeException(e);
 		}
 	}
+
 }
